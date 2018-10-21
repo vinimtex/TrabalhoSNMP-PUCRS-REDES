@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const _API_ADDRESS = "http://localhost:62322";
+const _API_ADDRESS = "http://localhost:62322/api/snmp";
 
 const Start = setting => {
     const address = `${_API_ADDRESS}/start`;
