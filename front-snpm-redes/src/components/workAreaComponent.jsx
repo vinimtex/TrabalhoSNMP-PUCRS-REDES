@@ -102,7 +102,8 @@ class WorkAreaComponent extends Component {
                         width={600}
                         height={300}
                         data={this.props.dadosGrafico}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        margin={{ top: 10, right: 50, left: 50, bottom: 10 }}
+
                     >
                         <XAxis dataKey="name" />
                         <YAxis />
@@ -111,11 +112,11 @@ class WorkAreaComponent extends Component {
                         <Legend />
                         <Line
                             type="monotone"
-                            dataKey="pv"
+                            dataKey="enviado"
                             stroke="#8884d8"
                             activeDot={{ r: 8 }}
                         />
-                        <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+                        <Line type="monotone" dataKey="recebido" stroke="#82ca9d" />
                     </LineChart>
                 )}
                 {/* fim: Gráficos */}

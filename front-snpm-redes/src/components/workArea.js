@@ -2,56 +2,79 @@ import React, { Component } from "react";
 import WorkAreaComponent from "../components/workAreaComponent";
 import SnmpService from "../snmp-service";
 
+var currentSettings = {};
+
 class WorkArea extends Component {
 
   state = {
     time: undefined,
     dadosGrafico: [
-      { name: "Page A", uv: 4000, pv: 2400, amt: 2400 },
-      { name: "Page B", uv: 3000, pv: 1398, amt: 2210 },
-      { name: "Page C", uv: 2000, pv: 9800, amt: 2290 },
-      { name: "Page D", uv: 2780, pv: 3908, amt: 2000 },
-      { name: "Page E", uv: 1890, pv: 4800, amt: 2181 },
-      { name: "Page F", uv: 2390, pv: 3800, amt: 2500 },
-      { name: "Page G", uv: 3490, pv: 4300, amt: 2100 }
-    ]
+      { name: "Datagramas", recebido: 0, enviado: 0 },
+      { name: "Octetos", recebido: 0, enviado: 0 },
+      { name: "Pacotes TCP", recebido: 0, enviado: 0 },
+      { name: "Pacotes UDP", recebido: 0, enviado: 0 }
+    ],
+    initialSettings: {}
   }
 
-  startPooling = () =>{
+  startPooling = (initialSettings) =>{
+
+    let time = initialSettings.timePooling == undefined? 1000 : initialSettings.timePooling;
 
     setInterval(()=>{
+      currentSettings = initialSettings == undefined ? this.state.initialSettings : initialSettings;
 
-      this.ObterDesempenho();
+      this.ObterDesempenho(currentSettings);
 
-    }, this.state.time);
+    }, time * 1000);
 
   }
 
-  ObterDesempenho = () => {
+  SetarValoresGrafico = (dadosGrafico_) =>{
 
-    SnmpService.ObterDesempenho()
+    const dadosGrafico = [ ...this.state.dadosGrafico ];
+
+    dadosGrafico[0].recebido = dadosGrafico_.datagramsReceived;
+    dadosGrafico[0].enviado = dadosGrafico_.datagramsSent;
+
+    dadosGrafico[1].recebido = dadosGrafico_.inOctects;
+    dadosGrafico[1].enviado = dadosGrafico_.outOctects;
+
+    dadosGrafico[2].recebido = dadosGrafico_.tcpPacketsIn;
+    dadosGrafico[2].enviado = dadosGrafico_.tcpPacketsOut;
+
+    dadosGrafico[2].recebido = dadosGrafico_.udpPacketsIn;
+    dadosGrafico[2].enviado = dadosGrafico_.udpPacketsOut;
+
+    this.setState({dadosGrafico});
+  }
+
+  ObterDesempenho = (currentSettings) => {
+
+    SnmpService.ObterDesempenho(currentSettings)
       .then((response) => {
         
-        // TODO: setar os dados do gráfico
-        // this.setState({ dadosGrafico: response.data});
+        this.SetarValoresGrafico(response.data.data);
 
       })
       .catch((response) => {
-        alert(`Erro ao obter métricas: ${response}.`)
+        // alert(`Erro ao obter métricas: ${response}.`)
       });
   }
 
   handleStartSubmitted = initialSettings => {
 
     if (initialSettings.timePooling == undefined || initialSettings.timePooling == ''
-      || initialSettings.AgentAddress == undefined || initialSettings.AgentAddress == '') {
-      alert('Informe todos os campos para comçar.')
+      || initialSettings.AgentAddress == undefined || initialSettings.AgentAddress == ''
+      || initialSettings.Community == undefined || initialSettings.Community == '') {
+      alert('Informe todos os campos para começar.')
       return;
     }
     SnmpService.Start(initialSettings)
       .then((response) => {
         alert(`Sessão iniciada com sucesso para o usuário ${response.data.data.sysName}.`);
-        this.startPooling();
+        this.startPooling(initialSettings);
+        this.setState({initialSettings: initialSettings});
         this.setState({ time: initialSettings.timePooling });
       })
       .catch((response) => {

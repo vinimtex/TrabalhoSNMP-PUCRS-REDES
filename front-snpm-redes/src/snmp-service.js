@@ -11,8 +11,8 @@ const Start = setting => {
     );
 }
 
-const ObterDesempenho = () => {
-    const address = `${_API_ADDRESS}/desempenho`;
+const ObterDesempenho = (setting) => {
+    const address = `${_API_ADDRESS}/desempenho?com=${setting.Community}&ipAddress=${setting.AgentAddress}`;
 
     return axios.get(
         address
