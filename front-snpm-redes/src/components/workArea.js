@@ -8,59 +8,142 @@ class WorkArea extends Component {
 
   state = {
     time: undefined,
-    dadosGrafico: [
-      { name: "Datagramas", recebido: 0, enviado: 0 },
-      { name: "Octetos", recebido: 0, enviado: 0 },
-      { name: "Pacotes TCP", recebido: 0, enviado: 0 },
-      { name: "Pacotes UDP", recebido: 0, enviado: 0 }
-    ],
+    dadosGrafico: {
+      Desempenho: [
+        { name: "Datagramas", recebido: 0, enviado: 0 },
+        { name: "Octetos", recebido: 0, enviado: 0 },
+        { name: "Pacotes TCP", recebido: 0, enviado: 0 },
+        { name: "Pacotes UDP", recebido: 0, enviado: 0 }
+      ],
+      Falhas: [
+        { name: "ipInHdrErrors", valor: 0 },
+        { name: "ipReasmFails", valor: 0 },
+        { name: "icmpInErrors", valor: 0 },
+        { name: "tcpAttemptFails", valor: 0 },
+        { name: "udpInErrors", valor: 0 }
+      ],
+      Configuracoes: [
+        { name: "sysUpTime", valor: 0 },
+        { name: "sysDescr", valor: 0 },
+        { name: "sysName", valor: 0 },
+        { name: "sysContact", valor: 0 },
+        { name: "hrMemorySize", valor: 0 }
+      ]
+    },
     initialSettings: {}
   }
 
-  startPooling = (initialSettings) =>{
+  startPooling = (initialSettings) => {
 
-    let time = initialSettings.timePooling == undefined? 1000 : initialSettings.timePooling;
+    let time = initialSettings.timePooling == undefined ? 1000 : initialSettings.timePooling;
 
-    setInterval(()=>{
+    setInterval(() => {
       currentSettings = initialSettings == undefined ? this.state.initialSettings : initialSettings;
 
       this.ObterDesempenho(currentSettings);
-
+      this.ObterConfiguracao(currentSettings);
+      this.ObterFalhas(currentSettings);
     }, time * 1000);
 
   }
 
-  SetarValoresGrafico = (dadosGrafico_) =>{
+  SetarValoresDesempenho = (dadosGrafico_) => {
 
-    const dadosGrafico = [ ...this.state.dadosGrafico ];
+    const dadosGrafico = { ...this.state.dadosGrafico };
 
-    dadosGrafico[0].recebido = dadosGrafico_.datagramsReceived;
-    dadosGrafico[0].enviado = dadosGrafico_.datagramsSent;
+    dadosGrafico.Desempenho[0].recebido = dadosGrafico_.datagramsReceived;
+    dadosGrafico.Desempenho[0].enviado = dadosGrafico_.datagramsSent;
 
-    dadosGrafico[1].recebido = dadosGrafico_.inOctects;
-    dadosGrafico[1].enviado = dadosGrafico_.outOctects;
+    dadosGrafico.Desempenho[1].recebido = dadosGrafico_.inOctects;
+    dadosGrafico.Desempenho[1].enviado = dadosGrafico_.outOctects;
 
-    dadosGrafico[2].recebido = dadosGrafico_.tcpPacketsIn;
-    dadosGrafico[2].enviado = dadosGrafico_.tcpPacketsOut;
+    dadosGrafico.Desempenho[2].recebido = dadosGrafico_.tcpPacketsIn;
+    dadosGrafico.Desempenho[2].enviado = dadosGrafico_.tcpPacketsOut;
 
-    dadosGrafico[2].recebido = dadosGrafico_.udpPacketsIn;
-    dadosGrafico[2].enviado = dadosGrafico_.udpPacketsOut;
+    dadosGrafico.Desempenho[2].recebido = dadosGrafico_.udpPacketsIn;
+    dadosGrafico.Desempenho[2].enviado = dadosGrafico_.udpPacketsOut;
 
-    this.setState({dadosGrafico});
+    this.setState({ dadosGrafico });
   }
 
   ObterDesempenho = (currentSettings) => {
 
     SnmpService.ObterDesempenho(currentSettings)
       .then((response) => {
-        
-        this.SetarValoresGrafico(response.data.data);
+
+        this.SetarValoresDesempenho(response.data.data);
 
       })
       .catch((response) => {
-        // alert(`Erro ao obter métricas: ${response}.`)
+        this.SetarValoresDesempenho({ datagramsReceived: 0, datagramsSent: 0, inOctects: 0, outOctects: 0, tcpPacketsIn: 0, tcpPacketsOut: 0, udpPacketsIn: 0, udpPacketsOut: 0 });
       });
   }
+
+  SetarValoresConfiguracao = (dadosGrafico_) => {
+
+    const dadosGrafico = { ...this.state.dadosGrafico };
+
+    dadosGrafico.Configuracoes[0].valor = dadosGrafico_[dadosGrafico.Configuracoes[0].name];
+
+    dadosGrafico.Configuracoes[1].valor = dadosGrafico_[dadosGrafico.Configuracoes[1].name];
+    dadosGrafico.Configuracoes[2].valor = dadosGrafico_[dadosGrafico.Configuracoes[2].name];
+    dadosGrafico.Configuracoes[3].valor = dadosGrafico_[dadosGrafico.Configuracoes[3].name];
+    dadosGrafico.Configuracoes[4].valor = dadosGrafico_[dadosGrafico.Configuracoes[4].name];
+
+    this.setState({ dadosGrafico });
+  }
+
+  ObterConfiguracao = (currentSettings) => {
+
+    SnmpService.ObterConfiguracao(currentSettings)
+      .then((response) => {
+
+        this.SetarValoresConfiguracao(response.data.data);
+
+      })
+      .catch((response) => {
+        this.SetarValoresConfiguracao(
+          { name: "sysUpTime", valor: 0 },
+          { name: "sysDescr", valor: 0 },
+          { name: "sysName", valor: 0 },
+          { name: "sysContact", valor: 0 },
+          { name: "hrMemorySize", valor: 0 }
+        );
+      });
+  }
+
+  SetarValoresFalhas = (dadosGrafico_) => {
+
+    const dadosGrafico = { ...this.state.dadosGrafico };
+
+    dadosGrafico.Falhas[0].valor = dadosGrafico_[dadosGrafico.Configuracoes[0].name];
+    dadosGrafico.Falhas[1].valor = dadosGrafico_[dadosGrafico.Falhas[1].name];
+    dadosGrafico.Falhas[2].valor = dadosGrafico_[dadosGrafico.Falhas[2].name];
+    dadosGrafico.Falhas[3].valor = dadosGrafico_[dadosGrafico.Falhas[3].name];
+    dadosGrafico.Falhas[4].valor = dadosGrafico_[dadosGrafico.Falhas[4].name];
+
+    this.setState({ dadosGrafico });
+  }
+
+  ObterFalhas = (currentSettings) => {
+
+    SnmpService.ObterFalhas(currentSettings)
+      .then((response) => {
+
+        this.SetarValoresFalhas(response.data.data);
+
+      })
+      .catch((response) => {
+        this.SetarValoresFalhas(
+          { name: "ipInHdrErrors", valor: 0 },
+          { name: "ipReasmFails", valor: 0 },
+          { name: "icmpInErrors", valor: 0 },
+          { name: "tcpAttemptFails", valor: 0 },
+          { name: "udpInErrors", valor: 0 }
+        );
+      });
+  }
+
 
   handleStartSubmitted = initialSettings => {
 
@@ -74,7 +157,7 @@ class WorkArea extends Component {
       .then((response) => {
         alert(`Sessão iniciada com sucesso para o usuário ${response.data.data.sysName}.`);
         this.startPooling(initialSettings);
-        this.setState({initialSettings: initialSettings});
+        this.setState({ initialSettings: initialSettings });
         this.setState({ time: initialSettings.timePooling });
       })
       .catch((response) => {

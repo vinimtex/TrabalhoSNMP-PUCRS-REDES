@@ -98,26 +98,47 @@ class WorkAreaComponent extends Component {
 
                 {/* começo: Gráficos */}
                 {!this.props.showFormStart && (
-                    <LineChart
-                        width={600}
-                        height={300}
-                        data={this.props.dadosGrafico}
-                        margin={{ top: 10, right: 50, left: 50, bottom: 10 }}
+                    <div>
+                        <div>
+                            <h1>Gráficos de Desempenho</h1>
+                            <LineChart
+                                width={600}
+                                height={300}
+                                data={this.props.dadosGrafico.Desempenho}
+                                margin={{ top: 10, right: 50, left: 50, bottom: 10 }}
 
-                    >
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <Tooltip />
-                        <Legend />
-                        <Line
-                            type="monotone"
-                            dataKey="enviado"
-                            stroke="#8884d8"
-                            activeDot={{ r: 8 }}
-                        />
-                        <Line type="monotone" dataKey="recebido" stroke="#82ca9d" />
-                    </LineChart>
+                            >
+                                <XAxis dataKey="name" />
+                                <YAxis />
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <Tooltip />
+                                <Legend />
+                                <Line
+                                    type="monotone"
+                                    dataKey="enviado"
+                                    stroke="#8884d8"
+                                    activeDot={{ r: 8 }}
+                                />
+                                <Line type="monotone" dataKey="recebido" stroke="#82ca9d" />
+                            </LineChart>
+                        </div>
+                        <div>
+                            <h1>Configurações</h1>
+                            <div>
+                                {this.props.dadosGrafico.Configuracoes.map((value, key) => {
+                                    return <div key={key}>{value.name} : {this.props.dadosGrafico.Configuracoes[key].valor}</div>;
+                                })}
+                            </div>
+                        </div>
+                        <div>
+                            <h1>Falhas</h1>
+                            <div>
+                                {this.props.dadosGrafico.Falhas.map((value, key) => {
+                                    return <div key={key}>{value.name} : {this.props.dadosGrafico.Falhas[key].valor}</div>;
+                                })}
+                            </div>
+                        </div>
+                    </div>
                 )}
                 {/* fim: Gráficos */}
 

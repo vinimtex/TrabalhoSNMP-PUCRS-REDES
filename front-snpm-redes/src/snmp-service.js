@@ -19,12 +19,20 @@ const ObterDesempenho = (setting) => {
     );
 }
 
-const ObterConfig = () =>{
-    const address = `${_API_ADDRESS}/getSetting`;
+const ObterConfiguracao = (setting) =>{
+    const address = `${_API_ADDRESS}/configuracao?com=${setting.Community}&ipAddress=${setting.AgentAddress}`;
 
     return axios.get(
         address
     );
 }
 
-export default { Start, ObterDesempenho, ObterConfig };
+const ObterFalhas = (setting) =>{
+    const address = `${_API_ADDRESS}/falhas?com=${setting.Community}&ipAddress=${setting.AgentAddress}`;
+
+    return axios.get(
+        address
+    );
+}
+
+export default { Start, ObterDesempenho, ObterConfiguracao, ObterFalhas };
